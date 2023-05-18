@@ -1,44 +1,9 @@
-# dataico-challenge
+# Dataico-challenge
 
-FIXME: description
+Hi, you can find the problems solutions in the src folder, in the folders named: problem 1, problem2 and problem3.
 
-## Installation
+Here are some images about the problems:
 
-Download from http://example.com/FIXME.
-
-## Usage
-
-FIXME: explanation
-
-    $ java -jar dataico-challenge-0.1.0-standalone.jar [args]
-
-## Options
-
-FIXME: listing of options this app accepts.
-
-## Examples
-
-...
-
-### Bugs
-
-...
-
-### Any Other Sections
-### That You Think
-### Might be Useful
-
-## License
-
-Copyright © 2023 FIXME
-
-This program and the accompanying materials are made available under the
-terms of the Eclipse Public License 2.0 which is available at
-http://www.eclipse.org/legal/epl-2.0.
-
-This Source Code may also be made available under the following Secondary
-Licenses when the conditions for such availability set forth in the Eclipse
-Public License, v. 2.0 are satisfied: GNU General Public License as published by
-the Free Software Foundation, either version 2 of the License, or (at your
-option) any later version, with the GNU Classpath Exception which is available
-at https://www.gnu.org/software/classpath/license.html.
+![Porblem 1](https://firebasestorage.googleapis.com/v0/b/chainy-link.appspot.com/o/links%2FbrzGN7IMdhZOEBsX64dRySgLWRi2%2Fimages%2FScreenshot%20from%202023-05-18%2002-27-01.png?alt=media&token=c9dcbc8d-ad2b-44a8-9a51-f9303c857fef)
+![Porblem 2](https://firebasestorage.googleapis.com/v0/b/chainy-link.appspot.com/o/links%2FbrzGN7IMdhZOEBsX64dRySgLWRi2%2Fimages%2FScreenshot%20from%202023-05-18%2002-27-51.png?alt=media&token=d07f1f0d-b39f-4fa2-8660-d8216a16b784)
+![Porblem 3](https://firebasestorage.googleapis.com/v0/b/chainy-link.appspot.com/o/links%2FbrzGN7IMdhZOEBsX64dRySgLWRi2%2Fimages%2FScreenshot%20from%202023-05-18%2002-29-02.png?alt=media&token=96fa8e3d-cda7-4bfb-9db1-4e5be6aaa286)
