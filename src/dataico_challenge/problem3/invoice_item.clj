@@ -22,15 +22,15 @@
 
 (deftest test-subtotal
   (testing "Subtotal with no discount"
-    (is (= (subtotal {:invoice-item/precise-quantity 2 :invoice-item/precise-price 10}) 20)))
+    (is (= (subtotal {:invoice-item/precise-quantity 2 :invoice-item/precise-price 10}) 20.0)))
   (testing "Subtotal with discount"
-    (is (= (subtotal {:invoice-item/precise-quantity 2 :invoice-item/precise-price 10 :invoice-item/discount-rate 50}) 10)))
+    (is (= (subtotal {:invoice-item/precise-quantity 2 :invoice-item/precise-price 10 :invoice-item/discount-rate 50}) 10.0)))
   (testing "Subtotal with zero quantity"
-    (is (= (subtotal {:invoice-item/precise-quantity 0 :invoice-item/precise-price 10}) 0)))
+    (is (= (subtotal {:invoice-item/precise-quantity 0 :invoice-item/precise-price 10}) 0.0)))
   (testing "Subtotal with zero price"
-    (is (= (subtotal {:invoice-item/precise-quantity 2 :invoice-item/precise-price 0}) 0)))
+    (is (= (subtotal {:invoice-item/precise-quantity 2 :invoice-item/precise-price 0}) 0.0)))
   (testing "Subtotal with zero quantity and price"
-    (is (= (subtotal {:invoice-item/precise-quantity 0 :invoice-item/precise-price 0}) 0))))
+    (is (= (subtotal {:invoice-item/precise-quantity 0 :invoice-item/precise-price 0}) 0.0))))
 
 
 ; Run all tests in te namespace
