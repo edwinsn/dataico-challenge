@@ -14,7 +14,7 @@
                                       :tax/rate     16}]}
                  {:invoice-item/id  "ii3"
                   :invoice-item/sku "SKU 3"
-                  :taxable/taxes    [{:tax/id       "t3"
+                  :taxable/taxes    [{:tax/id       "tb3"
                                       :tax/category :iva
                                       :tax/rate     19}]}
                  {:invoice-item/id          "ii4"
