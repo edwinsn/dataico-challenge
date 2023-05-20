@@ -1,30 +1,44 @@
-  (ns dataico-challenge.problem2.invoice_spec
-    (:gen-class)
-    (:require [clojure.java.io :as io]
-              [clojure.data.json :as json]
-              [clojure.spec.alpha :as s]
-              [clojure.string :as str]
-              [clojure.spec.alpha :as s]
-              )
+(ns dataico-challenge.problem2.invoice_spec
+  (:gen-class)
+  (:require [clojure.java.io :as io]
+            [clojure.data.json :as json]
+            [clojure.spec.alpha :as s]
+            [clojure.string :as str]
+            [clojure.spec.alpha :as s]
+            [clojure.instant :as i]
+            [clojure.instant :as instant]
+            )
 
-    )
+  )
 
-;New spec for invoices
-(require '[clojure.spec.alpha :as s])
+(s/def :customer/name string?)
+(s/def :customer/email string?)
+(s/def :invoice/customer (s/keys :req [:customer/name
+                                       :customer/email]))
 
-(s/def ::id string?)
-(s/def ::sku string?)
-(s/def ::category keyword?)
-(s/def ::rate number?)
+(s/def :tax/rate double?)
+(s/def :tax/category #{:iva})
+(s/def ::tax (s/keys :req [:tax/category
+                           :tax/rate]))
+(s/def :invoice-item/taxes (s/coll-of ::tax :kind vector? :min-count 1))
 
-(s/def ::tax (s/keys :req-un [::id ::category ::rate]))
-(s/def ::retention (s/keys :req-un [::id ::category ::rate]))
+(s/def :invoice-item/price double?)
+(s/def :invoice-item/quantity double?)
+(s/def :invoice-item/sku string?)
 
-(s/def ::taxable (s/keys :opt-un [::taxes]))
-(s/def ::retentionable (s/keys :opt-un [::retentions]))
+(s/def ::invoice-item
+  (s/keys :req [:invoice-item/price
+                :invoice-item/quantity
+                :invoice-item/sku
+                :invoice-item/taxes]))
 
-(s/def ::invoice-item (s/merge (s/keys :req-un [::id ::sku]) ::taxable ::retentionable))
-(s/def ::invoice (s/keys :req [:invoice/id]  :opt [:invoice/items]))
+(s/def :invoice/issue-date inst?)
+(s/def :invoice/items (s/coll-of ::invoice-item :kind vector? :min-count 1))
+
+(s/def ::invoice
+  (s/keys :req [:invoice/issue-date
+                :invoice/customer
+                :invoice/items]))
 
 
 
@@ -34,49 +48,73 @@
 ; the spec **::invoice** defined in **invoice-spec.clj**. Write a function that as an argument receives
 ; a file name (a JSON file name in this case) and returns a clojure map such that
 
+(defn convert-date-format [date-str]
+  (let [[day month year] (clojure.string/split date-str #"/")]
+    (str year "-" month "-" day)
+    )
+  )
+
 ;Responsible for reading the invoice file
 (defn json->clj [filename]
-  ;Open the file
   (with-open [rdr (io/reader filename)]
-    ;Get the map from the json
-    (json/read rdr :key-fn keyword)))
-
-;Responsible for loading the invoice from invoice.edn
-(defn load-example-invoice []
-  (clojure.edn/read-string (slurp "./invoice.edn"))
-  )
+    (-> (json/read rdr :key-fn (fn [k] (keyword (clojure.string/replace k "_" "-"))))
+        (update :invoice
+                (fn [invoice]
+                  (reduce-kv
+                    (fn [acc k v]
+                      (if (namespace k)
+                        (assoc acc k v)
+                        (assoc acc (keyword "invoice" (name k)) v)))
+                    {}
+                    invoice)))
+        )))
 
 
 ;Transform an invoice into a valid invoice, fill out invalid or missing spaces if necessary
 (defn transform-invoice [data]
-  (let [default-taxes [{:tax/id "" :tax/category :iva :tax/rate 0.0}]
-        default-retentions [{:retention/id "" :retention/category :ret_fuente :retention/rate 0.0}]]
-    (-> data
-        ; Ensure invoice has required properties
-        (update :invoice/id #(or % ""))
-        ;Ensure there is an items array
-        (update :invoice/items #(if (empty? %) [{:invoice-item/id "" :invoice-item/sku ""}] %))
-        ; Ensure each invoice item has required properties
-        (update :invoice/items #(mapv (fn [item] (merge {:invoice-item/id "" :invoice-item/sku ""}
-                                                        (assoc item :taxable/taxes (or (:taxable/taxes item) default-taxes))
-                                                        (assoc item :retentionable/retentions (or (:retentionable/retentions item) default-retentions)))) %)))))
 
+  (-> data
+      ;Format customers
+      (update :invoice/customer  #(if % {:customer/email (:email %) :customer/name (:name %)} ))
+      ;Format the issue-date
+      (update :invoice/issue-date #(if %  (instant/read-instant-date (convert-date-format %)) ))
+      ;Format the items
+      (update :invoice/items
+              (fn [invoice-items]
+                (mapv
+                  #(if % {:invoice-item/price (:price %)
+                          :invoice-item/quantity (:quantity %)
+                          :invoice-item/sku (:sku %)
+                          ;Format items taxes
+                          :invoice-item/taxes (mapv
+                                   (fn [tax] (if tax {
+                                                      :tax/category (and (= (:tax-category tax) "IVA") :iva)
+                                                      :tax/rate (double (:tax-rate tax ))
+                                                      }) )
+                            (:taxes %)
+                            )
+                          } )
+                  invoice-items
+                  )
+                )
+              )
+      )
+  )
 
 ;Responsible for getting an invoice from a file name and transforming it into a valid invoice
 (defn generate-invoice [filename]
   ;get the clojure map from the file
-  (let [data (load-example-invoice)
+  (let [data (json->clj filename)
         ;generate a valid invoice from the map
-        invoice (transform-invoice data)]
+        invoice (transform-invoice (:invoice data))]
     (if (s/valid? ::invoice invoice)
       ;if the invoice is valid then return it and print success!
       (do (println "Success")
-          (println "Invoice formatted:")
+          (println "Invoice formated:")
           (println invoice)
           )
       ;if the invoice is invalid
       (do (println "Error, invalid invoice:")
-          (println invoice)
           (s/explain ::invoice invoice)
           ))))
 
